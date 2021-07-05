@@ -1,0 +1,20 @@
+
+.layout-fixed .main-sidebar{
+    background-color: #002171;
+    color: #fff;
+}
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #ffa000;
+    color: #fff;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #002171;
+    border-color: #002171;
+    box-shadow: none;
+}
+
+.btn-primary:hover{
+    background-color: #002171;
+}
