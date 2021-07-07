@@ -122,7 +122,8 @@ function processMetode($conn, $input)
     usort($stepKNN, function ($a, $b) {
         return   $a['jarak'] - $b['jarak'];
     });
-    print_r($stepKNN);
+    //perhitungan knn
+    // print_r($stepKNN);
     // die;
     //test prediction
     $classifier = new KNearestNeighbors(5, new Euclidean());
