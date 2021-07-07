@@ -6,6 +6,7 @@ use Phpml\Classification\KNearestNeighbors;
 use Phpml\FeatureExtraction\TokenCountVectorizer;
 use Phpml\Tokenization\WhitespaceTokenizer;
 use Phpml\FeatureExtraction\TfIdfTransformer;
+use Phpml\Math\Distance\Euclidean;
 
 //paggination
 $endNumber = 7;
@@ -80,12 +81,31 @@ function tfIDTransform($dataSample)
     return $dataSample;
 }
 
+function showDistance($input, $judul, $sample, $allData)
+{
+    $euclidean = new Euclidean();
+    $i = 0;
+    $result = array();
+    foreach ($sample as $dt) {
+        $distance = array();
+        $distance['judul_input'] = $judul;
+        $distance['judul_sampel'] = $allData[$i]['judul_skripsi'];
+        $distance['jarak'] = $euclidean->distance($input[0], $dt);
+        $distance['bobot_input'] = $input;
+        array_push($result, $distance);
+        
+        $i+=1;
+    }
+    return $result;
+}
+
 function processMetode($conn, $input)
 {
 
     $allData = fetchJudulSkripsi($conn, 0, fetchAllJudulSkripsi($conn));
     $dataSample = [];
     $dataLabel = [];
+
     foreach ($allData as $sample) {
         array_push($dataSample, $sample['text_preprocessing']);
         array_push($dataLabel, $sample['label']);
@@ -98,9 +118,14 @@ function processMetode($conn, $input)
     //pembobotan text 
     $GLOBALS['vectorizer']->transform($input);
     $GLOBALS['transformer']->transform($input);
-
+    $stepKNN = showDistance($input, $_POST['judul_skripsi'], $dataSample, $allData);
+    usort($stepKNN, function ($a, $b) {
+        return   $a['jarak'] - $b['jarak'];
+    });
+    print_r($stepKNN);
+    // die;
     //test prediction
-    $classifier = new KNearestNeighbors(5);
+    $classifier = new KNearestNeighbors(5, new Euclidean());
     $classifier->train($dataSample, $dataLabel);
     $predict =  $classifier->predict($input)[0];
     return $predict;
@@ -182,7 +207,7 @@ function addDataSkripsi($conn, $BASE_URL, $id_user)
                     'id_judul' => $conn->insert_id,
                     'tanggal_pengajuan' => date("Y-m-d"),
                     'status' => 0,
-                    'periode'=>$_POST['periode']
+                    'periode' => $_POST['periode']
                 ];
                 $insertTablePengajuan = create($dataPengajuan, $conn, 'tb_pengajuan');
                 if ($ex && $insertTablePengajuan) {
